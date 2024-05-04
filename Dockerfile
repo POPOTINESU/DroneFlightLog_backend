@@ -12,7 +12,10 @@ ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
-    TZ=Asia/Tokyo
+    TZ=Asia/Tokyo \
+    LANG=C.UTF-8 \
+    PATH="/usr/local/bundle/bin:${PATH}"
+
 
 
 # Throw-away build stage to reduce size of final image
