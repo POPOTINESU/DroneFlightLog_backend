@@ -3,6 +3,11 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   include Devise::JWT::RevocationStrategies::JTIMatcher
 
+  # Userモデル
+  # name: ユーザー名
+  # email: メールアドレス
+  # password: パスワード
+
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
          :jwt_authenticatable, jwt_revocation_strategy: self

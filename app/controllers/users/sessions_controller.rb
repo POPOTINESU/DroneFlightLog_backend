@@ -2,6 +2,7 @@
 
 class Users::SessionsController < Devise::SessionsController
   skip_before_action :verify_authenticity_token, only: [:create]
+  respond_to :json
 
   # before_action :configure_sign_in_params, only: [:create]
 
@@ -18,16 +19,4 @@ class Users::SessionsController < Devise::SessionsController
       render json: {error: 'ログインに失敗しました。'}, status: :unauthorized
     end
   end
-
-  # DELETE /resource/sign_out
-  # def destroy
-  #   super
-  # end
-
-  # protected
-
-  # If you have extra params to permit, append them to the sanitizer.
-  # def configure_sign_in_params
-  #   devise_parameter_sanitizer.permit(:sign_in, keys: [:attribute])
-  # end
 end
