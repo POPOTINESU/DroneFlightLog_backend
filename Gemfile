@@ -18,10 +18,6 @@ gem "devise"
 gem 'devise-jwt'
 gem 'jsonapi-serializer'
 
-gem 'rubocop', require: false
-gem 'rubocop-performance', require: false
-gem 'rubocop-rails', require: false
-
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 
@@ -53,6 +49,10 @@ end
 group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+  gem 'rubocop', require: false
+  gem 'rubocop-performance', require: false
+  gem 'rubocop-rails', require: false
+  gem 'rubocop-rspec', require: false
 end
 
 gem "dockerfile-rails", ">= 1.6", :group => :development
