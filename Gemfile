@@ -18,6 +18,10 @@ gem "devise"
 gem 'devise-jwt'
 gem 'jsonapi-serializer'
 
+gem 'rubocop', require: false
+gem 'rubocop-performance', require: false
+gem 'rubocop-rails', require: false
+
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 
