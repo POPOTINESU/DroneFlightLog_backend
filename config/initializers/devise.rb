@@ -319,13 +319,13 @@ Devise.setup do |config|
     # jwtの有効期限は1日
     # jwtのsecret_keyは、Railsのcredentialsから取得する
     jwt.secret = Rails.application.credentials.devise_jwt_secret_key!
-    jwt.algorithm = Rails.application.credentials.devise_jwt_algorithm!
     jwt.dispatch_requests = [
-      [`POST`, %r{^/auth/login$}]
-  ]
+      ['POST', %r{^/login$}],
+      ['DELETE', %r{^/logout$}]
+    ]
     jwt.revocation_requests = [
-      [`DELETE`, %r{^/auth/logout$}]
-  ]
-  jwt.expiration_time = 1.day.to_i
+      ['DELETE', %r{^/logout$}]
+    ]
+    jwt.expiration_time = 1.day.to_i
   end
 end
