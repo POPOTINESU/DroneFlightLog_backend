@@ -318,7 +318,8 @@ Devise.setup do |config|
     # Deleteリクエストが来たら、jwtを使って認証する
     # jwtの有効期限は1日
     # jwtのsecret_keyは、Railsのcredentialsから取得する
-    jwt.secret = Rails.application.credentials.secret_key_base
+    jwt.secret = Rails.application.credentials.devise_jwt_secret_key!
+    jwt.algorithm = Rails.application.credentials.devise_jwt_algorithm!
     jwt.dispatch_requests = [
       [`POST`, %r{^/auth/login$}]
   ]
