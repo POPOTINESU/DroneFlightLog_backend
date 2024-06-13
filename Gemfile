@@ -15,6 +15,8 @@ gem "puma", ">= 5.0"
 # gem "jbuilder"
 
 gem "devise"
+gem 'devise-jwt'
+gem 'jsonapi-serializer'
 
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
