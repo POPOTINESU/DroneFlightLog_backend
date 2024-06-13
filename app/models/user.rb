@@ -4,7 +4,8 @@ class User < ApplicationRecord
   include Devise::JWT::RevocationStrategies::JTIMatcher
 
   # Userモデル
-  # name: ユーザー名
+  # first_name: 名
+  # last_name: 姓
   # email: メールアドレス
   # password: パスワード
 
@@ -12,7 +13,8 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :jwt_authenticatable, jwt_revocation_strategy: self
 
-  validates :name, presence: {message: "名前を入力してください"}
+  validates :first_name, presence: {message: "名を入力してください"}
+  validates :last_name, presence: {message: "姓を入力してください"}
   validates :email, presence: {message: "メールアドレスを入力してください"}
   validates :password, presence: {message: "パスワードを入力してください"}
 
