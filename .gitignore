@@ -33,3 +33,6 @@
 /config/master.key
 
 tmp/*
+/vendor/bundle
+!/config/jwt.private_key
+!/config/jwt.public_key
