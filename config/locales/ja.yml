@@ -1,5 +1,11 @@
 ---
 ja:
+  session_controller:
+    create:
+      success: ログインしました
+      failure: ログインに失敗しました
+    destroy:
+      success: ログアウトしました
   activerecord:
     models:
       user: ユーザー
