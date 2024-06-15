@@ -1,4 +1,4 @@
-require "#{Rails.root}/app/controllers/application_controller.rb"
+require "#{Rails.root.join('app/controllers/application_controller.rb')}"
 
 module Api
   module V1
@@ -12,7 +12,7 @@ module Api
           @authenticated_user = user
           access_token(@authenticated_user)
           refresh_token(@authenticated_user)
-          render json: { user: @authenticated_user.as_json(only: %i[id])}
+          render json: { user: @authenticated_user.as_json(only: %i[id]) }
         else
           render json: { error: 'Invalid email or password' }, status: :unauthorized
         end
