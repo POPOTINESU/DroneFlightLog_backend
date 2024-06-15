@@ -1,11 +1,10 @@
 Rails.application.routes.draw do
-  namespace :api do
+  namespace :api, defaults: { format: :json } do
     namespace :v1 do
       resources :users
-      resources :authntications do
+      resources :authentications do
         collection do
-          post 'login'
-          delete 'logout'
+          post :login
         end
       end
     end

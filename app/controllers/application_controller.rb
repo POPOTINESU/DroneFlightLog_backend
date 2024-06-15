@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::API
-  before_action :authenticate_user
+  include ActionController::Cookies
 
   private
 
@@ -13,11 +13,33 @@ class ApplicationController < ActionController::API
   end
 
   def authenticate(request)
-    view_context.helper_method
     if request.headers['Authorization'].present?
       verify_access_token(request)
     else
       'Token not found'
     end
+  end
+
+  def verify_access_token(request)
+    access_token_secret = Rails.application.credentials.access_token_secret
+    # Cookiesからアクセストークンを取得
+    access_token = cookies.signed[:access_token]
+    decoded_access_token = JWT.decode(access_token, access_token_secret, true, algorithm: 'HS256')
+    user_id = decoded_access_token[0]['user_id']
+    User.find(user_id)
+  rescue JWT::DecodeError
+    verify_refresh_token(request)
+  end
+
+  def verify_refresh_token(_request)
+    refresh_token_secret = Rails.application.credentials.refresh_token_secret
+    # Cookiesからリフレッシュトークンを取得
+    refresh_token = cookies.signed[:refresh_token]
+    decoded_refresh_token = JWT.decode(refresh_token, refresh_token_secret, true, algorithm: 'HS256')
+    user_id = decoded_refresh_token[0]['user_id']
+    user = User.find(user_id)
+    access_token(user)
+  rescue JWT::DecodeError
+    'ログインしてください'
   end
 end
