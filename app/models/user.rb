@@ -4,7 +4,6 @@ class User < ApplicationRecord
   # last_name: string
   # email: string
   # password_digest: string
-  # created_at: datetime
 
   has_secure_password
 
