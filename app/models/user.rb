@@ -19,9 +19,7 @@ class User < ApplicationRecord
   # min_length:
   validates :password, length: { minimum: 6 }
 
-  def full_name()
+  def full_name
     "#{last_name} #{first_name}"
   end
-
-
 end

@@ -1,11 +1,18 @@
 ---
 ja:
-  session_controller:
+  users_controller:
     create:
+      success: ユーザー登録が完了しました
+      failure: ユーザー登録に失敗しました
+    update:
+      success: ユーザー情報を更新しました
+      failure: ユーザー情報の更新に失敗しました
+    destroy:
+      success: ユーザーを削除しました
+      failure: ユーザーの削除に失敗しました
+    login:
       success: ログインしました
       failure: ログインに失敗しました
-    destroy:
-      success: ログアウトしました
   activerecord:
     models:
       user: ユーザー
