@@ -59,4 +59,4 @@ USER rails:rails
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start the server by default, this can be overwritten at runtime
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "8080"]
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
