@@ -10,9 +10,6 @@ ja:
     destroy:
       success: ユーザーを削除しました
       failure: ユーザーの削除に失敗しました
-    login:
-      success: ログインしました
-      failure: ログインに失敗しました
   activerecord:
     models:
       user: ユーザー

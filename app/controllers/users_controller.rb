@@ -1,28 +1,17 @@
 class UsersController < ApplicationController
   def create
-    # POST /users
-    # args: first_name,last_name,email, password
-    # return: user, token
-    @user = User.new(user_params)
-    if @user.save
-      token = encode_token(user_id: @user.id)
-      render json: { user: @user, token: }, status: :created
+    # POST /api/v1/users
+    # args: email, password, password_confirmation
+    # return: user
+    # helper_method :access_token, :reflesh_token
+    view_context.helper_method
+    user = User.new(user_params)
+    if user.save
+      access_token(user)
+      reflesh_token(user)
+      render json: { user: }
     else
-      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
-    end
-  end
-
-  def login
-    # POST /login
-    # args: email, password
-    # return: user, token
-    # return: error
-    @user = User.find_by(email: params[:email])
-    if @user&.authenticate(params[:password])
-      token = encode_token(user_id: @user.id)
-      render json: { user: @user, token: }, status: :ok
-    else
-      render json: { error: :failure }, status: :unauthorized
+      render json: { error: user.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
