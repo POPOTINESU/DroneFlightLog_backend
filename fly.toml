@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for drone-flight-log on 2024-06-15T23:37:03+09:00
+# fly.toml app configuration file generated for drone-flight-log on 2024-06-16T12:08:09+09:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -9,22 +9,29 @@ console_command = '/rails/bin/rails console'
 
 [build]
 
-[deploy]
-  release_command = './bin/rails db:prepare'
-
 [http_service]
-  internal_port = 8080
+  internal_port = 3000
   force_https = true
-  auto_stop_machines = false
+  auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
   processes = ['app']
 
-[[vm]]
-  memory = '256mb'
-  cpu_kind = 'shared'
-  cpus = 1
+[checks]
+  [checks.status]
+    port = 3000
+    type = 'http'
+    interval = '10s'
+    timeout = '30s'
+    grace_period = '30s'
+    method = 'GET'
+    path = '/up'
+    protocol = 'http'
+    tls_skip_verify = false
 
-[[statics]]
-  guest_path = '/rails/public'
-  url_prefix = '/'
+    [checks.status.headers]
+      X-Forwarded-Proto = 'https'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory_mb = 512
