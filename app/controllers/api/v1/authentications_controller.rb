@@ -3,6 +3,14 @@ require "#{Rails.root.join('app/controllers/application_controller.rb')}"
 module Api
   module V1
     class AuthenticationsController < ApplicationController
+
+      if Rails.env.production?
+        rescue_from StandardError, with: :rescue_500
+        rescue_from ActiveRecord::RecordNotFound, with: :rescue_404
+        rescue_from ActionController::ParameterMissing, with: :rescue_400
+        rescue_from ActiveRecord::RecordInvalid, with: :rescue_422
+      end
+
       def login
         # POST /api/v1/authentications/login
         # args: email, password
