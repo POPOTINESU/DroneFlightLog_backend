@@ -16,7 +16,7 @@ class ApplicationController < ActionController::API
     if request.headers['Authorization'].present?
       verify_access_token(request)
     else
-      'Token not found'
+      render json: { error: 'ログインしてください' }, status: :unauthorized
     end
   end
 
