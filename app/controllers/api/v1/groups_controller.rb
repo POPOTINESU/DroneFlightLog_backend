@@ -2,8 +2,10 @@ require Rails.root.join('app/controllers/application_controller.rb').to_s
 module Api
   module V1
     class GroupsController < ApplicationController
+      before_action :authenticate_user, only: %i[index]
       def index
-        user = User.find(params[:user_id])
+        # GET /api/v1/groups
+        user = User.find_by(id: @current_user.id)
         if user.nil?
           render json: { message: 'ユーザーが取得できませんでした。' }, with: :unprocessable_entity
         else
