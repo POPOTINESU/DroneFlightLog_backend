@@ -1,14 +1,13 @@
-require "#{Rails.root.join('app/controllers/application_controller.rb')}"
+require Rails.root.join('app/controllers/application_controller.rb').to_s
 
 module Api
   module V1
     class AuthenticationsController < ApplicationController
-
       if Rails.env.production?
-        rescue_from StandardError, with: :rescue_500
-        rescue_from ActiveRecord::RecordNotFound, with: :rescue_404
-        rescue_from ActionController::ParameterMissing, with: :rescue_400
-        rescue_from ActiveRecord::RecordInvalid, with: :rescue_422
+        rescue_from StandardError, with: :rescue_five_hundred
+        rescue_from ActiveRecord::RecordNotFound, with: :rescue_four_o_four
+        rescue_from ActionController::ParameterMissing, with: :rescue_four_hundred
+        rescue_from ActiveRecord::RecordInvalid, with: :rescue_four_twenty_two
       end
 
       def login

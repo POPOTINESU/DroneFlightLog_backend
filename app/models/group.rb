@@ -4,10 +4,9 @@ class Group < ApplicationRecord
   # A group has many flight_logs
   # A group has many drones
 
-  has_many :users
+  has_many :users, dependent: :destroy
   # has_many :flight_logs
   # has_many :drones
-
 
   # tabele_data
   # id: uuid
@@ -17,6 +16,4 @@ class Group < ApplicationRecord
   # FK: drone_id
 
   validate :name, presence: true
-
-
 end
