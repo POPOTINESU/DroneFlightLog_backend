@@ -17,6 +17,21 @@ module Api
           end
         end
       end
+
+      def create
+        # POST /api/v1/groups
+        user = User.find_by(id: @current_user.id)
+        if user.nil?
+          render json: { message: 'ユーザーが取得できませんでした。' }, with: :unprocessable_entity
+        else
+          group = user.groups.build(group_params)
+          if group.save
+            return render json: group
+          else
+            render json: { error: group.errors.full_messages }, status: :unprocessable_entity
+          end
+        end
+      end
     end
   end
 end
