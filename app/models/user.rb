@@ -6,6 +6,11 @@ class User < ApplicationRecord
   # email: string
   # password_digest: string
 
+  # Relationships
+
+  has many :group_users
+  has many :groups, through: :group_users
+
   has_secure_password
 
   validates :first_name, presence: true

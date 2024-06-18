@@ -32,6 +32,12 @@ module Api
           end
         end
       end
+
+      private
+
+      def group_params
+        params.permit(:name)
+      end
     end
   end
 end
