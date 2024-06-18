@@ -8,8 +8,8 @@ class User < ApplicationRecord
 
   # Relationships
 
-  has many :group_users
-  has many :groups, through: :group_users
+  has_many :group_users
+  has_many :groups, through: :group_users
 
   has_secure_password
 
