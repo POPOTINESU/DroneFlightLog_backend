@@ -25,6 +25,12 @@ module Api
         end
       end
 
+      def logout
+        cookies.delete(:access_token)
+        cookies.delete(:refresh_token)
+        render json: { message: 'ログアウトしました。' }
+      end
+
       private
 
       def user_params
@@ -43,11 +49,6 @@ module Api
         payload = { user_id: user.id }
         refresh_token = JWT.encode(payload, refresh_token_secret, 'HS256')
         cookies.signed[:refresh_token] = { value: refresh_token, httponly: true, expires: 2.weeks.from_now }
-      end
-
-      def delete_token
-        cookies.delete(:access_token)
-        cookies.delete(:refresh_token)
       end
     end
   end

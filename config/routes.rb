@@ -9,6 +9,7 @@ Rails.application.routes.draw do
       resources :authentications do
         collection do
           post :login
+          delete :logout
         end
       end
     end
