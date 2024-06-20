@@ -4,13 +4,12 @@ module Api
     class GroupsController < ApplicationController
       before_action :authenticate_user, only: %i[index]
       def index
-        # GET /api/v1/groups
-        user = User.find_by(id: @current_user)
-        if user.nil?
+        # GET /api/v1/groups@current_user
+        if @current_user.nil?
           render json: { message: 'ユーザーが取得できませんでした。' }, with: :unprocessable_entity
         else
-          groups = user.groups
-          if groups.exists?
+          groups = @current_user.groups
+          if groups.empty?
             render json: groups
           else
             render json: { message: 'グループを取得できませんでした。' }, with: :unprocessable_entity
