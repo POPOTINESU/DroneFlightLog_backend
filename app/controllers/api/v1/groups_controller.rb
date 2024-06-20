@@ -5,14 +5,16 @@ module Api
       before_action :authenticate_user, only: %i[index]
       def index
         # GET /api/v1/groups@current_user
+        # args: access_token, refresh_token
+        # return: id, name
         if @current_user.nil?
           render json: { message: 'ユーザーが取得できませんでした。' }, with: :unprocessable_entity
         else
           groups = @current_user.groups
           if groups.empty?
-            render json: groups
+            render json: { message: 'グループがありません。' }, with: :unprocessable_entity
           else
-            render json: { message: 'グループを取得できませんでした。' }, with: :unprocessable_entity
+            render json: groups.map { |group| { id: group.id, name: group.name, user_count: group.users.count } }
           end
         end
       end
@@ -25,13 +27,12 @@ module Api
         else
           group = user.groups.build(group_params)
           if group.save
-            return render json: group
+            render json: group
           else
             render json: { error: group.errors.full_messages }, status: :unprocessable_entity
           end
         end
       end
-
       private
 
       def group_params
