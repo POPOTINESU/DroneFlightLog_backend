@@ -1,4 +1,4 @@
-require "#{Rails.root.join('app/controllers/application_controller.rb')}"
+require Rails.root.join('app/controllers/application_controller.rb').to_s
 
 module Api
   module V1
