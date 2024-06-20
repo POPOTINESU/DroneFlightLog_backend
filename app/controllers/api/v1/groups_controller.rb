@@ -5,7 +5,7 @@ module Api
       before_action :authenticate_user, only: %i[index]
       def index
         # GET /api/v1/groups
-        user = User.find_by(id: @current_user.id)
+        user = User.find_by(id: @current_user)
         if user.nil?
           render json: { message: 'ユーザーが取得できませんでした。' }, with: :unprocessable_entity
         else
