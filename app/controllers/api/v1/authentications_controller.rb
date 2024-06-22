@@ -26,15 +26,33 @@ module Api
       end
 
       def logout
+        # DELETE /api/v1/authentications/logout
+        # JWTトークンを削除する
+        # return: message
         cookies.delete(:access_token)
         cookies.delete(:refresh_token)
         render json: { message: 'ログアウトしました。' }
       end
 
+      def signup
+        # POST /api/v1/authentications/signup
+        #　ユーザーが登録できたら、JWTを使ってログイン状態にする
+        # args: first_name, last_name, email, password
+        # return: message
+        @user = User.new(user_params)
+        if @user.save
+          access_token(@user)
+          refresh_token(@user)
+          render json: { message: 'ユーザー登録が完了しました。' }
+        else
+          render json: { error: @user.errors.full_messages }, status: :unprocessable_entity
+        end
+      end
+
       private
 
       def user_params
-        params.permit(:email, :password)
+        params.permit(:first_name, :last_name, :email, :password)
       end
 
       def access_token(user)
