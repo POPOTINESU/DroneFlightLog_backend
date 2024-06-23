@@ -21,44 +21,22 @@ module Api
 
       def create
         # POST /api/v1/groups
-        # args: name, group_id, password
+        # グループを作成したユーザーを管理者にする。
+        # status: :joined, role: :admin
+        # args: name
         user = User.find_by(id: @current_user.id)
-        if user.nil?
-          render json: { message: 'ユーザーが取得できませんでした。' }, with: :unprocessable_entity
+        group = user.groups.create(group_params, status: :joined, role: :admin)
+        if group.save
+          render json: { message: 'グループを作成しました。' }
         else
-          group = user.groups.build(group_params)
-          if group.save
-            render json: group
-          else
-            render json: { error: group.errors.full_messages }, status: :unprocessable_entity
-          end
-        end
-      end
-
-      def login
-        # POST /api/v1/authentications/login
-        # 現在ログインしているユーザーとグループを紐づける
-        # args: group_id, password
-        # return: message
-
-        group = Group.find_by(id: params[:group_id])
-        if group.nil?
-          render json: { message: 'グループIDまたは、パスワードが違います。' }, with: :unprocessable_entity
-        else
-          password = params[:password]
-          if group.password == password
-            @current_user.groups << group
-            render json: { message: 'グループに参加しました。' }
-          else
-            render json: { message: 'グループIDまたは、パスワードが違います。' }, with: :unprocessable_entity
-          end
+          render json: { message: 'グループを作成できませんでした。' }, with: :unprocessable_entity
         end
       end
 
       private
 
       def group_params
-        params.permit(:name, :group_id, :password)
+        params.permit(:name)
       end
     end
   end
