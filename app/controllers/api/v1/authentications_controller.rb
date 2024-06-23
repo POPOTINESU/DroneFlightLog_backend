@@ -36,7 +36,7 @@ module Api
 
       def signup
         # POST /api/v1/authentications/signup
-        #　ユーザーが登録できたら、JWTを使ってログイン状態にする
+        # 　ユーザーが登録できたら、JWTを使ってログイン状態にする
         # args: first_name, last_name, email, password
         # return: message
         @user = User.new(user_params)

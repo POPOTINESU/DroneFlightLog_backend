@@ -5,20 +5,16 @@ class ApplicationController < ActionController::API
 
   def authenticate_user
     user = authenticate(request)
-    if user.is_a?(User)
-      @current_user = user
-      Rails.logger.info "Authenticated user: #{@current_user.id}"
-    else
-      return render json: { error: user }, status: :unauthorized
-    end
+    return render json: { error: user }, status: :unauthorized unless user.is_a?(User)
+
+    @current_user = user
+    Rails.logger.info "Authenticated user: #{@current_user.id}"
   end
 
   def authenticate(request)
-    if cookies.signed[:access_token]
-      verify_access_token(request)
-    else
-      return 'ログインしてください'
-    end
+    return 'ログインしてください' unless cookies.signed[:access_token]
+
+    verify_access_token(request)
   end
 
   def verify_access_token(request)

@@ -12,6 +12,12 @@ class Group < ApplicationRecord
   # tabele_data
   # id: uuid
   # name: string
+  # group_id: string
+  # password: string
 
   validates :name, presence: true
+  validates :group_id, presence: true
+  validates :password, presence: true
+
+  validates :group_id, uniqueness: true
 end

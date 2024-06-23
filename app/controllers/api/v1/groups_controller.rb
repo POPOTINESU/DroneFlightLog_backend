@@ -2,7 +2,7 @@ require Rails.root.join('app/controllers/application_controller.rb').to_s
 module Api
   module V1
     class GroupsController < ApplicationController
-      before_action :authenticate_user, only: %i[index]
+      before_action :authenticate_request
       def index
         # GET /api/v1/groups@current_user
         # args: access_token, refresh_token
@@ -33,10 +33,31 @@ module Api
           end
         end
       end
+
+      def login
+        # POST /api/v1/authentications/login
+        # 現在ログインしているユーザーとグループを紐づける
+        # args: group_id, password
+        # return: message
+
+        group = Group.find_by(id: params[:group_id])
+        if group.nil?
+          render json: { message: 'グループIDまたは、パスワードが違います。' }, with: :unprocessable_entity
+        else
+          password = params[:password]
+          if group.password == password
+            @current_user.groups << group
+            render json: { message: 'グループに参加しました。' }
+          else
+            render json: { message: 'グループIDまたは、パスワードが違います。' }, with: :unprocessable_entity
+          end
+        end
+      end
+
       private
 
       def group_params
-        params.permit(:name)
+        params.permit(:name, :group_id, :password)
       end
     end
   end
