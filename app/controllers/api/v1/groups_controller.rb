@@ -21,6 +21,7 @@ module Api
 
       def create
         # POST /api/v1/groups
+        # args: name, group_id, password
         user = User.find_by(id: @current_user.id)
         if user.nil?
           render json: { message: 'ユーザーが取得できませんでした。' }, with: :unprocessable_entity
