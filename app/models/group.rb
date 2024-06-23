@@ -14,6 +14,7 @@ class Group < ApplicationRecord
   # name: string
   # group_id: string
   # password: string
+  has_secure_password
 
   validates :name, presence: true
   validates :group_id, presence: true
