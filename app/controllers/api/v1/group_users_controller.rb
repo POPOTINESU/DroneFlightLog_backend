@@ -2,7 +2,7 @@ require Rails.root.join('app/controllers/application_controller.rb').to_s
 module Api
   module V1
     class GroupUsersController < ApplicationController
-      before_action :authenticate_request
+      before_action :authenticate_user
       def invite
         # POST /api/v1/groups/invite
         # 渡されたemailを元にユーザーをグループに招待する。
