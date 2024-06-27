@@ -4,17 +4,11 @@ class ApplicationController < ActionController::API
   private
 
   def authenticate_user
-    user = authenticate(request)
+    user = verify_access_token(request)
     return render json: { error: user }, status: :unauthorized unless user.is_a?(User)
 
     @current_user = user
     Rails.logger.info "Authenticated user: #{@current_user.id}"
-  end
-
-  def authenticate(request)
-    return 'ログインしてください' unless cookies.signed[:access_token]
-
-    verify_access_token(request)
   end
 
   def verify_access_token(request)
@@ -38,5 +32,12 @@ class ApplicationController < ActionController::API
     access_token(user)
   rescue JWT::DecodeError
     'ログインしてください'
+  end
+
+  def access_token(user)
+    access_token_secret = Rails.application.credentials.access_token_secret
+    payload = { user_id: user.id }
+    access_token = JWT.encode(payload, access_token_secret, 'HS256')
+    cookies.signed[:access_token] = { value: access_token, httponly: true, expires: 1.hour.from_now }
   end
 end
