@@ -5,7 +5,13 @@ Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
       resources :users
-      resources :groups
+      resources :groups, only: [:index, :create]
+      resources :group_users do
+        collection do
+          post :invite
+          post :accept
+        end
+      end
       resources :authentications do
         collection do
           post :login
