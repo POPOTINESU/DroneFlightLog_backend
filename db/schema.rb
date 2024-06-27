@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_27_132017) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_27_203533) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,6 +20,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_27_132017) do
     t.date "purchaseDate", null: false
     t.index ["JUNumber"], name: "index_drones_on_JUNumber", unique: true
     t.index ["drone_number"], name: "index_drones_on_drone_number", unique: true
+  end
+
+  create_table "group_drones", force: :cascade do |t|
+    t.uuid "group_id", null: false
+    t.uuid "drone_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["drone_id"], name: "index_group_drones_on_drone_id"
+    t.index ["group_id"], name: "index_group_drones_on_group_id"
   end
 
   create_table "group_users", force: :cascade do |t|
@@ -49,6 +58,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_27_132017) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "group_drones", "drones"
+  add_foreign_key "group_drones", "groups"
   add_foreign_key "group_users", "groups"
   add_foreign_key "group_users", "users"
 end
