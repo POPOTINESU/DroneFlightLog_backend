@@ -13,7 +13,8 @@ module Api
           if groups.empty?
             render json: { message: 'グループがありません。' }, status: :unprocessable_entity
           else
-            render json: groups.map { |group| { id: group.id, name: group.name, user_count: group.users.count } }
+            drone_count = GroupDrone.where(group: groups).count
+            render json: groups.map { |group| { id: group.id, name: group.name, user_count: group.users.count, drone_count: drone_count} }
           end
         end
       end

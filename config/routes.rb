@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :users
       resources :groups, only: [:index, :create]
+      resources :drones, only: [:create]
       resources :group_users do
         collection do
           post :invite
