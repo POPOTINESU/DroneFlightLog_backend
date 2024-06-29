@@ -25,15 +25,10 @@ module Api
         else
           ActiveRecord::Base.transaction do
             group = Group.new(group_params)
-            Rails.logger.info "Group parameters: #{group_params.inspect}"
-            Rails.logger.info "Group object: #{group.inspect}"
             group_user = GroupUser.new(user: @current_user, group: group, status: :joined, role: :admin)
-            Rails.logger.info "GroupUser object: #{group_user.inspect}"
 
             if group.save
-              Rails.logger.info "Group saved successfully: #{group.inspect}"
               group_user.save!
-              Rails.logger.info "GroupUser saved successfully: #{group_user.inspect}"
               add_members_to_group(group)
               add_drones_to_group(group)
               render json: { message: 'グループを作成しました。' }, status: :created
@@ -45,6 +40,26 @@ module Api
             render json: { message: "保存処理中にエラーが発生しました: #{e.message}" }, status: :unprocessable_entity
             raise ActiveRecord::Rollback
           end
+        end
+      end
+
+      def show
+        # GET /api/v1/groups/:id
+        # グループの詳細を取得する
+        # args: id
+        # return: id, name,
+        #   users: [{name, email, role, status}],
+        #   drones: [{id, droneNumber, JUNumber, purchaseDate}]
+        group = Group.includes(group_users: :user, group_drones: :drone).find_by(id: params[:id])
+        if group.nil?
+          render json: { message: 'グループが見つかりませんでした。' }, status: :unprocessable_entity
+        else
+          render json: {
+            id: group.id,
+            name: group.name,
+            users: group.group_users.map { |gu| { name: gu.user.full_name, email: gu.user.email, role: gu.role, status: gu.status } },
+            drones: group.group_drones.map { |gd| { id: gd.drone.id, drone_number: gd.drone.drone_number, JUNumber: gd.drone.JUNumber, purchaseDate: gd.drone.purchaseDate } }
+          }
         end
       end
 
@@ -72,7 +87,7 @@ module Api
             group_user = GroupUser.new(user: user, group: group, status: :invited, role: :member)
             group_user.save!
           else
-            Rails.logger.warn("User with email #{email} not found")
+            Rails.logger.error "ユーザーが見つかりませんでした: #{email}"
           end
         end
       end
