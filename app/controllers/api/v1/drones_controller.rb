@@ -4,23 +4,6 @@ module Api
     class DronesController < ApplicationController
       before_action :authenticate_user
 
-      def index
-        # GET /api/v1/drones
-        # ドローン一覧を取得する
-        #
-        #args: group_id
-        #
-        #retrn: droneNumber, JUNumber, droneName, purchaseDate
-
-        group = Group.find_by(id: params[:id])
-        if group.nil?
-          render json: {message: 'グループが見つかりませんでした。'}, status: :unprocessable_entity
-        else
-          drones = group.drones
-          render json: drones.map { |drone| {droneNumber: drone.drone_number, JUNumber: drone.JUNumber, droneName: drone.drone_name, purchaseDate: drone.purchase_date} }
-        end
-      end
-
       def create
         # POST /api/v1/drones
         # グループにドローンを追加する
