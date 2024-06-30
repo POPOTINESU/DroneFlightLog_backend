@@ -1,6 +1,9 @@
 Geocoder.configure(
-  lookup: :nominatim,
-  http_headers: { "User-Agent" => "my_app" },  # Nominatimの使用にはUser-Agentが必要
-  timeout: 5,  # リクエストのタイムアウト時間
-  units: :km   # 距離の単位
-)
+  # Geocoding options
+  lookup: :google,
+  api_key: Rails.application.credentials.googleMaps_API_KEY,
+  use_https: true,
+  language: :ja,
+  units: :km,
+  timeout: 15,
+  )
