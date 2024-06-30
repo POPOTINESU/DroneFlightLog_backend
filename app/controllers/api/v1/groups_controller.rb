@@ -9,7 +9,7 @@ module Api
         if user_blank?
           return
         else
-          groups = @current_user.groups
+          groups = GroupUser.where(user: @current_user, status: :joined).order(last_accessed_ad: :desc)
           if groups.empty?
             render json: { message: 'グループがありません。' }, status: :unprocessable_entity
           else
@@ -54,6 +54,8 @@ module Api
         if group.nil?
           render json: { message: 'グループが見つかりませんでした。' }, status: :unprocessable_entity
         else
+          group_user.touch_last_accessed
+          group = group_user.group
           render json: {
             id: group.id,
             name: group.name,

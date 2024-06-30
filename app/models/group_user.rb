@@ -8,4 +8,9 @@ class GroupUser < ApplicationRecord
   enum role: { member: 0, admin: 10 }
 
   validates :role, presence: true
+
+  # 最後にアクセスした日時を更新
+  def touth_last_accessed
+    update_attribute(:last_accessed, Time.current)
+  end
 end
