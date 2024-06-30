@@ -9,12 +9,21 @@ module Api
         if user_blank?
           return
         else
-          groups = GroupUser.where(user: @current_user, status: :joined).order(last_accessed_ad: :desc)
+          group_users = GroupUser.where(user: @current_user, status: :joined).order(last_accessed: :desc)
+          group_ids = group_users.pluck(:group_id)
+          groups = Group.where(id: group_ids)
           if groups.empty?
             render json: { message: 'グループがありません。' }, status: :unprocessable_entity
           else
-            drone_count = GroupDrone.where(group: groups).count
-            render json: groups.map { |group| { id: group.id, name: group.name, user_count: group.users.count, drone_count: drone_count} }
+            drone_counts = GroupDrone.where(group_id: group_ids).group(:group_id).count
+            render json: groups.map { |group|
+              {
+                id: group.id,
+                name: group.name,
+                user_count: group.users.count,
+                drone_count: drone_counts[group.id] || 0
+              }
+            }
           end
         end
       end
@@ -44,22 +53,15 @@ module Api
       end
 
       def show
-        # GET /api/v1/groups/:id
-        # グループの詳細を取得する
-        # args: id
-        # return: id, name,
-        #   users: [{name, email, role, status}],
-        #   drones: [{id, droneNumber, JUNumber, purchaseDate}]
-        group = Group.includes(group_users: :user, group_drones: :drone).find_by(id: params[:id])
+        group = Group.includes(:users, group_drones: :drone).find_by(id: params[:id])
         if group.nil?
           render json: { message: 'グループが見つかりませんでした。' }, status: :unprocessable_entity
         else
-          group_user.touch_last_accessed
-          group = group_user.group
+          group_user = GroupUser.find_by(user: @current_user, group: group)
           render json: {
             id: group.id,
             name: group.name,
-            users: group.group_users.map { |gu| { name: gu.user.full_name, email: gu.user.email, role: gu.role, status: gu.status } },
+            users: group.users.map { |user| { id: user.id,name: user.full_name,  email: user.email, role: group_user.role, status: group_user.status } },
             drones: group.group_drones.map { |gd| { id: gd.drone.id, drone_number: gd.drone.drone_number, JUNumber: gd.drone.JUNumber, purchaseDate: gd.drone.purchaseDate } }
           }
         end
