@@ -20,6 +20,7 @@ Rails.application.routes.draw do
           post :signup
         end
       end
+      get 'current_location', to: 'locations#current_location'
     end
   end
 end
