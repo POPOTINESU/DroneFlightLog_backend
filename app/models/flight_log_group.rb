@@ -1,0 +1,2 @@
+class FlightLogGroup < ApplicationRecord
+end

@@ -1,0 +1,3 @@
+class FlightLogUser < ApplicationRecord
+  
+end

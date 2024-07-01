@@ -13,6 +13,7 @@ Rails.application.routes.draw do
           post :accept
         end
       end
+      resources :flight_logs, only: [:index, :create]
       resources :authentications do
         collection do
           post :login
@@ -20,6 +21,7 @@ Rails.application.routes.draw do
           post :signup
         end
       end
+      get 'current_location', to: 'locations#current_location'
     end
   end
 end

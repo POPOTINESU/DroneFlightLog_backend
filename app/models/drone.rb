@@ -1,7 +1,10 @@
 class Drone < ApplicationRecord
   # Relationships
-  has_many :group_drones
-  has_many :groups, through: :group_drones
+  has_many :group_drones, dependent: :destroy
+  has_many :groups, through: :group_drones, dependent: :destroy
+
+  has_many :flight_log_drones, dependent: :destroy
+  has_many :flight_logs, through: :flight_log_drones, dependent: :destroy
 
   # Validations
   validates :drone_number, presence: true, uniqueness: true
