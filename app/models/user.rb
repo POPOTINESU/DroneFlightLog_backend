@@ -8,8 +8,11 @@ class User < ApplicationRecord
 
   # Relationships
 
-  has_many :group_users
-  has_many :groups, through: :group_users
+  has_many :group_users, dependent: :destroy
+  has_many :groups, through: :group_users, dependent: :destroy
+
+  has_many :flight_log_users, dependent: :destroy
+  has_many :flight_logs, through: :groups, dependent: :destroy
 
   has_secure_password
 

@@ -1,0 +1,2 @@
+class FlightLogDrone < ApplicationRecord
+end

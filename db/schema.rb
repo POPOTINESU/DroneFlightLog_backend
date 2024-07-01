@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_30_003141) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_01_101326) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,6 +20,47 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_30_003141) do
     t.date "purchaseDate", null: false
     t.index ["JUNumber"], name: "index_drones_on_JUNumber", unique: true
     t.index ["drone_number"], name: "index_drones_on_drone_number", unique: true
+  end
+
+  create_table "flight_log_drones", force: :cascade do |t|
+    t.uuid "flight_log_id", null: false
+    t.uuid "drone_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["drone_id"], name: "index_flight_log_drones_on_drone_id"
+    t.index ["flight_log_id"], name: "index_flight_log_drones_on_flight_log_id"
+  end
+
+  create_table "flight_log_groups", force: :cascade do |t|
+    t.uuid "flight_log_id", null: false
+    t.uuid "group_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["flight_log_id"], name: "index_flight_log_groups_on_flight_log_id"
+    t.index ["group_id"], name: "index_flight_log_groups_on_group_id"
+  end
+
+  create_table "flight_log_users", force: :cascade do |t|
+    t.uuid "flight_log_id", null: false
+    t.uuid "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["flight_log_id"], name: "index_flight_log_users_on_flight_log_id"
+    t.index ["user_id"], name: "index_flight_log_users_on_user_id"
+  end
+
+  create_table "flight_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.date "flight_date"
+    t.string "flight_summary"
+    t.string "takeoff_location"
+    t.string "landing_location"
+    t.time "takeoff_time"
+    t.time "landing_time"
+    t.time "total_time"
+    t.string "flight_purpose", default: [], array: true
+    t.string "specific_flight_types", default: [], array: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "group_drones", force: :cascade do |t|
@@ -59,6 +100,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_30_003141) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "flight_log_drones", "drones"
+  add_foreign_key "flight_log_drones", "flight_logs"
+  add_foreign_key "flight_log_groups", "flight_logs"
+  add_foreign_key "flight_log_groups", "groups"
+  add_foreign_key "flight_log_users", "flight_logs"
+  add_foreign_key "flight_log_users", "users"
   add_foreign_key "group_drones", "drones"
   add_foreign_key "group_drones", "groups"
   add_foreign_key "group_users", "groups"

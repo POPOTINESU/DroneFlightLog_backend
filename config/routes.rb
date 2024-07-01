@@ -13,6 +13,7 @@ Rails.application.routes.draw do
           post :accept
         end
       end
+      resources :flight_logs, only: [:index, :create]
       resources :authentications do
         collection do
           post :login
