@@ -1,4 +1,12 @@
 class FlightLog < ApplicationRecord
+  # Relationships
+  has_many :flight_log_drones
+  has_many :drones, through: :flight_log_drones
+  has_many :flight_log_users
+  has_many :users, through: :flight_log_users
+  has_many :flight_log_groups
+  has_many :groups, through: :flight_log_groups
+
   # validate
   validates :flight_date, presence: true
   validates :takeoff_time, presence: true

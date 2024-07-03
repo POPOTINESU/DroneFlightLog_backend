@@ -13,7 +13,11 @@ Rails.application.routes.draw do
           post :accept
         end
       end
-      resources :flight_logs, only: [:index, :create]
+      resources :flight_logs, only: [:index, :show, :create, :update, :destroy] do
+        member do
+          get :edit
+        end
+      end
       resources :authentications do
         collection do
           post :login
