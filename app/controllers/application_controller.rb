@@ -2,6 +2,21 @@ class ApplicationController < ActionController::API
   include ActionController::Cookies
 
   private
+  def rescue_five_hundred(exception)
+    render json: { error: exception.message }, status: 500
+  end
+
+  def rescue_four_o_four(exception)
+    render json: { error: exception.message }, status: 404
+  end
+
+  def rescue_four_hundred(exception)
+    render json: { error: exception.message }, status: 400
+  end
+
+  def rescue_four_twenty_two(exception)
+    render json: { error: exception.message }, status: 422
+  end
 
   def authenticate_user
     user = verify_access_token(request)
