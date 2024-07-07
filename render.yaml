@@ -1,17 +1,17 @@
 databases:
   - name: droneflightlog
     databaseName: droneflightlog
-    user: shigekuni
-    plan: free
+    user: shigekni
+    region: singapore
 
 services:
   - type: web
-    name: DroneFlightLog_backend
-    runtime: ruby
+    name: droneflightlog
+    env: ruby
+    region: singapore
     plan: free
     buildCommand: "./bin/render-build.sh"
-    # preDeployCommand: "bundle exec rails db:migrate" # preDeployCommand only available on paid instance types
-    startCommand: "bundle exec rails server"
+    startCommand: "bundle exec puma -C config/puma.rb"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -19,5 +19,4 @@ services:
           property: connectionString
       - key: RAILS_MASTER_KEY
         sync: false
-      - key: WEB_CONCURRENCY
-        value: 2
+    autoDeploy: false

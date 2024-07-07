@@ -34,5 +34,7 @@ module Backend
 
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore
+
+    config.hosts << "droneflightlog-backend.onrender.com"
   end
 end
