@@ -11,14 +11,13 @@ module Api
       end
 
       def login
-        # POST /api/v1/authentications/login
-        # args: email, password
-        # return: user
         user = User.find_by(email: params[:email])
         if user&.authenticate(params[:password])
           @authenticated_user = user
           access_token(@authenticated_user)
           refresh_token(@authenticated_user)
+          Rails.logger.info "Login successful. Access token set for user: #{user.id}"
+          Rails.logger.info "Cookies after login: #{cookies.to_hash.inspect}"
           render json: { user: @authenticated_user.as_json(only: %i[id]) }
         else
           render json: { error: 'パスワードまたは、メールアドレスが違います。' }, status: :unauthorized
@@ -59,14 +58,26 @@ module Api
         access_token_secret = Rails.application.credentials.access_token_secret
         payload = { user_id: user.id }
         access_token = JWT.encode(payload, access_token_secret, 'HS256')
-        cookies.signed[:access_token] = { value: access_token, httponly: true, expires: 1.hour.from_now, secure: Rails.env.production?, same_site: :none }
+        cookies.signed[:access_token] = {
+          value: access_token,
+          httponly: true,
+          expires: 1.hour.from_now,
+          secure: Rails.env.production?,
+          same_site: :lax
+        }
       end
 
       def refresh_token(user)
         refresh_token_secret = Rails.application.credentials.refresh_token_secret
         payload = { user_id: user.id }
         refresh_token = JWT.encode(payload, refresh_token_secret, 'HS256')
-        cookies.signed[:refresh_token] = { value: refresh_token, httponly: true, expires: 2.weeks.from_now, secure: Rails.env.production?, same_site: :none }
+        cookies.signed[:refresh_token] = {
+          value: refresh_token,
+          httponly: true,
+          expires: 2.weeks.from_now,
+          secure: Rails.env.production?,
+          same_site: :lax
+        }
       end
     end
   end
