@@ -4,7 +4,11 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
-      resources :users
+      resources :users do
+        collection do
+          get :login_user
+        end
+      end
       resources :groups, only: [:index, :create, :show]
       resources :drones, only: [:index, :create]
       resources :group_users do
