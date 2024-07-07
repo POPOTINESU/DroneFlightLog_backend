@@ -33,7 +33,7 @@ module Backend
     config.i18n.default_locale = :ja
 
     config.middleware.use ActionDispatch::Cookies
-    config.middleware.use ActionDispatch::Session::CookieStore
+    config.middleware.use ActionDispatch::Session::CookieStore, key: '_your_app_session'
 
     config.hosts << "droneflightlog-backend.onrender.com"
   end
