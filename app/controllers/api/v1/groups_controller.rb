@@ -42,7 +42,8 @@ module Api
               add_drones_to_group(group)
               render json: { message: 'グループを作成しました。' }, status: :created
             else
-              render json: { message: 'グループを作成できませんでした。' }, status: :unprocessable_entity
+              Rails.logger.error "グループの作成に失敗しました: #{group.errors.full_messages.join(', ')}"
+              render json: { message: 'グループを作成できませんでした。', errors: group.errors.full_messages }, status: :unprocessable_entity
             end
           rescue => e
             Rails.logger.error "保存処理中にエラーが発生しました: #{e.message}"
