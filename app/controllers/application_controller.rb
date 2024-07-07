@@ -2,52 +2,57 @@ class ApplicationController < ActionController::API
   include ActionController::Cookies
 
   private
+  def rescue_five_hundred(exception)
+    render json: { error: exception.message }, status: 500
+  end
+
+  def rescue_four_o_four(exception)
+    render json: { error: exception.message }, status: 404
+  end
+
+  def rescue_four_hundred(exception)
+    render json: { error: exception.message }, status: 400
+  end
+
+  def rescue_four_twenty_two(exception)
+    render json: { error: exception.message }, status: 422
+  end
 
   def authenticate_user
     user = verify_access_token(request)
-    unless user.is_a?(User)
-      return render json: { error: user }, status: :unauthorized
-    end
+    return render json: { error: user }, status: :unauthorized unless user.is_a?(User)
 
     @current_user = user
+    Rails.logger.info "Authenticated user: #{@current_user.id}"
   end
 
   def verify_access_token(request)
     access_token_secret = Rails.application.credentials.access_token_secret
+    # Cookiesからアクセストークンを取得
     access_token = cookies.signed[:access_token]
-    return 'Access token not found' unless access_token
-
-    begin
-      decoded_access_token = JWT.decode(access_token, access_token_secret, true, algorithm: 'HS256')
-      user_id = decoded_access_token[0]['user_id']
-      User.find(user_id)
-    rescue JWT::DecodeError => e
-      Rails.logger.info "Access token decode error: #{e.message}"
-      verify_refresh_token(request)
-    end
+    decoded_access_token = JWT.decode(access_token, access_token_secret, true, algorithm: 'HS256')
+    user_id = decoded_access_token[0]['user_id']
+    User.find(user_id)
+  rescue JWT::DecodeError
+    verify_refresh_token(request)
   end
 
   def verify_refresh_token(_request)
     refresh_token_secret = Rails.application.credentials.refresh_token_secret
+    # Cookiesからリフレッシュトークンを取得
     refresh_token = cookies.signed[:refresh_token]
-    return 'Refresh token not found' unless refresh_token
-
-    begin
-      decoded_refresh_token = JWT.decode(refresh_token, refresh_token_secret, true, algorithm: 'HS256')
-      user_id = decoded_refresh_token[0]['user_id']
-      user = User.find(user_id)
-      access_token(user)
-      user
-    rescue JWT::DecodeError => e
-      Rails.logger.info "Refresh token decode error: #{e.message}"
-      'ログインしてください'
-    end
+    decoded_refresh_token = JWT.decode(refresh_token, refresh_token_secret, true, algorithm: 'HS256')
+    user_id = decoded_refresh_token[0]['user_id']
+    user = User.find(user_id)
+    access_token(user)
+  rescue JWT::DecodeError
+    'ログインしてください'
   end
 
   def access_token(user)
     access_token_secret = Rails.application.credentials.access_token_secret
     payload = { user_id: user.id }
     access_token = JWT.encode(payload, access_token_secret, 'HS256')
-    cookies.signed[:access_token] = { value: access_token, httponly: true, secure: Rails.env.production?, expires: 1.hour.from_now }
+    cookies.signed[:access_token] = { value: access_token, httponly: true, expires: 1.hour.from_now }
   end
 end
