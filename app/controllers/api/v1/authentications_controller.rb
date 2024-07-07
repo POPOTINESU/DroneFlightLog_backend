@@ -59,14 +59,14 @@ module Api
         access_token_secret = Rails.application.credentials.access_token_secret
         payload = { user_id: user.id }
         access_token = JWT.encode(payload, access_token_secret, 'HS256')
-        cookies.signed[:access_token] = { value: access_token, httponly: true, expires: 1.hour.from_now }
+        cookies.signed[:access_token] = { value: access_token, httponly: true, expires: 1.hour.from_now, secure: Rails.env.production?, same_site: :none }
       end
 
       def refresh_token(user)
         refresh_token_secret = Rails.application.credentials.refresh_token_secret
         payload = { user_id: user.id }
         refresh_token = JWT.encode(payload, refresh_token_secret, 'HS256')
-        cookies.signed[:refresh_token] = { value: refresh_token, httponly: true, expires: 2.weeks.from_now }
+        cookies.signed[:refresh_token] = { value: refresh_token, httponly: true, expires: 2.weeks.from_now, secure: Rails.env.production?, same_site: :none }
       end
     end
   end
