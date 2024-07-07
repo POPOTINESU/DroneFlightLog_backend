@@ -69,9 +69,7 @@ module Api
           )
 
           if flight_log.save
-            FlightLogUser.create!(flight_log_id: flight_log.id, user_id: user.id)
-            FlightLogDrone.create!(flight_log_id: flight_log.id, drone_id: drone.id)
-            FlightLogGroup.create!(flight_log_id: flight_log.id, group_id: group.id)
+            create_flight_log(flight_log)
             render json: { message: 'フライトログを作成しました。' }, status: :created
           else
             render json: { error: flight_log.errors.full_messages }, status: :unprocessable_entity
@@ -131,9 +129,7 @@ module Api
             flight_log.users.destroy_all
             flight_log.groups.destroy_all
 
-            FlightLogUser.create!(flight_log_id: flight_log.id, user_id: user.id)
-            FlightLogDrone.create!(flight_log_id: flight_log.id, drone_id: drone.id)
-            FlightLogGroup.create!(flight_log_id: flight_log.id, group_id: group.id)
+            create_flight_log(flight_log)
 
             render json: { message: 'フライトログを更新しました。' }, status: :ok
           else
@@ -165,6 +161,12 @@ module Api
       end
 
       private
+
+      def create_flight_log(flight_log)
+        FlightLogUser.create!(flight_log_id: flight_log.id, user_id: user.id)
+        FlightLogDrone.create!(flight_log_id: flight_log.id, drone_id: drone.id)
+        FlightLogGroup.create!(flight_log_id: flight_log.id, group_id: group.id)
+      end
 
       def flight_log_params
         params.require(:flight_log).permit(
