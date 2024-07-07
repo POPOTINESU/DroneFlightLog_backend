@@ -1,22 +1,33 @@
+# Exported from Render on 2024-07-07T02:15:03Z
 databases:
-  - name: droneflightlog
-    databaseName: droneflightlog
-    user: shigekni
-    region: singapore
-
+- name: droneflightlog
+  databaseName: droneflightlog
+  user: shigekni
+  plan: free
+  region: singapore
+  ipAllowList:
+  - source: 0.0.0.0/0
+    description: everywhere
+  postgresMajorVersion: "16"
 services:
-  - type: web
-    name: droneflightlog
-    env: ruby
-    region: singapore
-    plan: free
-    buildCommand: "./bin/render-build.sh"
-    startCommand: "bundle exec puma -C config/puma.rb"
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: droneflightlog
-          property: connectionString
-      - key: RAILS_MASTER_KEY
-        sync: false
-        
+- type: web
+  name: DroneFlightLog_backend
+  runtime: docker
+  repo: https://github.com/POPOTINESU/DroneFlightLog_backend
+  plan: free
+  envVars:
+  - key: WEB_CONCURRENCY
+    sync: false
+  - key: RAILS_MASTER_KEY
+    sync: false
+  - key: POSTGRES_USER
+    sync: false
+  - key: POSTGRES_PASSWORD
+    sync: false
+  - key: POSTGRES_DB
+    sync: false
+  region: singapore
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+version: "1"
+
