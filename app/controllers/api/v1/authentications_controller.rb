@@ -63,7 +63,7 @@ module Api
           httponly: true,
           expires: 1.hour.from_now,
           secure: Rails.env.production?,
-          same_site: :lax
+          same_site: Rails.env.production? ? :none : :lax
         }
       end
 
@@ -76,7 +76,7 @@ module Api
           httponly: true,
           expires: 2.weeks.from_now,
           secure: Rails.env.production?,
-          same_site: :lax
+          same_site: Rails.env.production? ? :none : :lax
         }
       end
     end
