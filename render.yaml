@@ -30,3 +30,4 @@ services:
   dockerContext: .
   dockerfilePath: ./Dockerfile
 version: "1"
+
