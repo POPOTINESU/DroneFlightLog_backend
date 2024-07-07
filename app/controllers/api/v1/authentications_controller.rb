@@ -21,7 +21,7 @@ module Api
           refresh_token(@authenticated_user)
           render json: { user: @authenticated_user.as_json(only: %i[id]) }
         else
-          render json: { error: 'Invalid email or password' }, status: :unauthorized
+          render json: { error: 'パスワードまたは、メールアドレスが違います。' }, status: :unauthorized
         end
       end
 
