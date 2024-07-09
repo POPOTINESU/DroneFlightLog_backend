@@ -33,7 +33,6 @@ module Api
           }, status: :ok
         end
       end
-
       def create
         ActiveRecord::Base.transaction do
           data = flight_log_params
@@ -69,7 +68,7 @@ module Api
           )
 
           if flight_log.save
-            create_flight_log(flight_log)
+            create_flight_log(flight_log, user, drone, group)
             render json: { message: 'フライトログを作成しました。' }, status: :created
           else
             render json: { error: flight_log.errors.full_messages }, status: :unprocessable_entity
@@ -162,7 +161,7 @@ module Api
 
       private
 
-      def create_flight_log(flight_log)
+      def create_flight_log(flight_log, user, drone, group)
         FlightLogUser.create!(flight_log_id: flight_log.id, user_id: user.id)
         FlightLogDrone.create!(flight_log_id: flight_log.id, drone_id: drone.id)
         FlightLogGroup.create!(flight_log_id: flight_log.id, group_id: group.id)
