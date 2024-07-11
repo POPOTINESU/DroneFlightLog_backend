@@ -32,11 +32,6 @@ module Backend
     config.active_record.default_timezone = :local
     config.i18n.default_locale = :ja
 
-    config.action_mailer.mailjet_settings = {
-      api_key: Rails.application.credentials.mailjet_API_KEY,
-      secret_key: Rails.application.credentials.mailjet_SECRET_KEY,
-  }
-
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore, key: '_your_app_session'
 
