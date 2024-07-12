@@ -6,6 +6,8 @@ class FlightLog < ApplicationRecord
   has_many :users, through: :flight_log_users
   has_many :flight_log_groups
   has_many :groups, through: :flight_log_groups
+  has_many :problem_fields
+  has_many :users, through: :problem_fields
 
   # validate
   validates :flight_date, presence: true

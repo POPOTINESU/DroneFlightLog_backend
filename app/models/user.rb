@@ -14,6 +14,9 @@ class User < ApplicationRecord
   has_many :flight_log_users, dependent: :destroy
   has_many :flight_logs, through: :groups, dependent: :destroy
 
+  has_many :problem_fields, dependent: :destroy
+  has_many :flight_logs, through: :problem_fields, dependent: :destroy
+
   has_secure_password
 
   validates :first_name, presence: true

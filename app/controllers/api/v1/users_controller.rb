@@ -5,10 +5,10 @@ module Api
     class UsersController < ApplicationController
       before_action :authenticate_user
 
-      def login_user
+      def index
         # ログインしているユーザーを返す
         # user_name: nameを返す
-        render json: { user_name: @current_user.name }
+        render json: { user_name: @current_user.full_name }
       end
     end
   end

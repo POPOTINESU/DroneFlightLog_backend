@@ -4,11 +4,7 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
-      resources :users do
-        collection do
-          get :login_user
-        end
-      end
+      resources :users
       resources :password_resets, only: [:create, :edit, :update], param: :token
       resources :groups, only: [:index, :create, :show]
       resources :drones, only: [:index, :create]

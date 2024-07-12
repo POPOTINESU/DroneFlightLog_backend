@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_10_214440) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_12_145014) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -90,6 +90,30 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_10_214440) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "problem_fields", force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "flight_log_id", null: false
+    t.string "problem_description"
+    t.date "date_of_resolution_datetime"
+    t.string "corrective_action"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["flight_log_id"], name: "index_problem_fields_on_flight_log_id"
+    t.index ["user_id"], name: "index_problem_fields_on_user_id"
+  end
+
+  create_table "problems_fields", force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "flight_log_id", null: false
+    t.string "problem_description"
+    t.date "date_of_resolution_datetime"
+    t.string "corrective_action"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["flight_log_id"], name: "index_problems_fields_on_flight_log_id"
+    t.index ["user_id"], name: "index_problems_fields_on_user_id"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "first_name"
     t.string "last_name"
@@ -112,4 +136,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_10_214440) do
   add_foreign_key "group_drones", "groups"
   add_foreign_key "group_users", "groups"
   add_foreign_key "group_users", "users"
+  add_foreign_key "problem_fields", "flight_logs"
+  add_foreign_key "problem_fields", "users"
+  add_foreign_key "problems_fields", "flight_logs"
+  add_foreign_key "problems_fields", "users"
 end
