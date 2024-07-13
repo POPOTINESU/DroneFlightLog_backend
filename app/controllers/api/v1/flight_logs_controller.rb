@@ -1,3 +1,4 @@
+require Rails.root.join('app/controllers/application_controller.rb').to_s
 module Api
   module V1
     class FlightLogsController < ApplicationController
@@ -8,12 +9,13 @@ module Api
         if group.nil?
           render json: { message: 'グループが見つかりませんでした。' }, status: :unprocessable_entity
         else
-          flight_logs = FlightLog.joins(:flight_log_groups).where(flight_log_groups: { group_id: group.id }).includes(:drones, :users)
+          flight_logs = FlightLog.joins(:flight_log_groups).where(flight_log_groups: { group_id: group.id }).includes(:drones, :users, :problem_fields)
           flight_logs_with_details = flight_logs.map do |flight_log|
             {
               flight_log: flight_log,
               drones: flight_log.drones.select(:id, :JUNumber),
-              users: flight_log.users.map { |user| { id: user.id, full_name: user.full_name } }
+              users: flight_log.users.map { |user| { id: user.id, full_name: user.full_name } },
+              problem_fields: flight_log.problem_fields.map { |pf| { id: pf.id, problem_description: pf.problem_description } }
             }
           end
           render json: { flight_logs: flight_logs_with_details }, status: :ok
@@ -21,18 +23,22 @@ module Api
       end
 
       def show
-        flight_log = FlightLog.includes(:drones, :users).find_by(id: params[:id])
+        flight_log = FlightLog.includes(:drones, :users, :problem_fields).find_by(id: params[:id])
         if flight_log.nil?
           render json: { message: 'フライトログが見つかりませんでした。' }, status: :unprocessable_entity
         else
+          problem_field = flight_log.problem_fields.first
           render json: {
+            id: flight_log.id,
             flight_log: flight_log,
             drones: flight_log.drones.select(:id, :JUNumber),
             users: flight_log.users.map { |user| { id: user.id, full_name: user.full_name } },
-            groups: flight_log.groups.map { |group| { id: group.id, name: group.name } }
+            groups: flight_log.groups.map { |group| { id: group.id, name: group.name } },
+            problem_field: problem_field ? { id: problem_field.id, problem_description: problem_field.problem_description, date_of_resolution_datetime: problem_field.date_of_resolution_datetime, corrective_action: problem_field.corrective_action } : nil
           }, status: :ok
         end
       end
+
       def create
         ActiveRecord::Base.transaction do
           data = flight_log_params
@@ -68,7 +74,14 @@ module Api
           )
 
           if flight_log.save
-            create_flight_log(flight_log, user, drone, group)
+            problem = ProblemField.new(
+              flight_log_id: flight_log.id,
+              user_id: user.id,
+              problem_description: data[:problem_description],
+              date_of_resolution_datetime: data[:date_of_resolution_datetime],
+              corrective_action: data[:corrective_action]
+            )
+            create_flight_log(flight_log, user, drone, group, problem)
             render json: { message: 'フライトログを作成しました。' }, status: :created
           else
             render json: { error: flight_log.errors.full_messages }, status: :unprocessable_entity
@@ -124,11 +137,18 @@ module Api
             flight_purpose: data[:flight_purpose],
             specific_flight_types: data[:specific_flight_types]
           )
+            problem_field = ProblemField.find_or_initialize_by(flight_log_id: flight_log.id, user_id: user.id)
+            problem_field.update(
+              problem_description: data[:problem_description],
+              date_of_resolution_datetime: data[:date_of_resolution_datetime],
+              corrective_action: data[:corrective_action]
+            )
+
             flight_log.drones.destroy_all
             flight_log.users.destroy_all
             flight_log.groups.destroy_all
 
-            create_flight_log(flight_log)
+            create_flight_log(flight_log, user, drone, group, problem_field)
 
             render json: { message: 'フライトログを更新しました。' }, status: :ok
           else
@@ -161,17 +181,19 @@ module Api
 
       private
 
-      def create_flight_log(flight_log, user, drone, group)
+      def create_flight_log(flight_log, user, drone, group, problem)
         FlightLogUser.create!(flight_log_id: flight_log.id, user_id: user.id)
         FlightLogDrone.create!(flight_log_id: flight_log.id, drone_id: drone.id)
         FlightLogGroup.create!(flight_log_id: flight_log.id, group_id: group.id)
+
+        ProblemField.create!(problem.attributes.merge(flight_log_id: flight_log.id))
       end
 
       def flight_log_params
         params.require(:flight_log).permit(
           :flight_date, :pilot_name, :group_id, :JUNumber, :flight_summary,
-          :takeoff_location, :landing_location, :takeoff_time,
-          :landing_time, :total_time, :malfunction_content,
+          :takeoff_location, :landing_location, :takeoff_time,:problem_description,
+          :date_of_resolution_datetime, :corrective_action,:landing_time, :total_time,
           flight_purpose: [], specific_flight_types: []
         )
       end

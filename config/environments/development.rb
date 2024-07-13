@@ -69,4 +69,14 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
   config.action_dispatch.cookies_same_site_protection = :lax
+
+  config.action_mailer.delivery_method = :mailjet
+  config.action_mailer.mailjet_settings = {
+    api_key: Rails.application.credentials.dig(:mailjet, :api_key),
+    secret_key: Rails.application.credentials.dig(:mailjet, :secret_key)
+  }
+
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3001, protocol: 'http'}
 end

@@ -87,4 +87,14 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  config.action_mailer.delivery_method = :mailjet
+  config.action_mailer.mailjet_settings = {
+    api_key: Rails.application.credentials.dig(:mailjet, :api_key),
+    secret_key: Rails.application.credentials.dig(:mailjet, :secret_key)
+  }
+
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.default_url_options = { host: 'www.drone-flight-log.com', protocol: 'https' }
 end
