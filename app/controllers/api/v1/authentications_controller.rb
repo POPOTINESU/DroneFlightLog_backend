@@ -16,8 +16,6 @@ module Api
           @authenticated_user = user
           access_token(@authenticated_user)
           refresh_token(@authenticated_user)
-          Rails.logger.info "Login successful. Access token set for user: #{user.id}"
-          Rails.logger.info "Cookies after login: #{cookies.to_hash.inspect}"
           render json: { user: @authenticated_user.as_json(only: %i[id]) }
         else
           render json: { error: 'パスワードまたは、メールアドレスが違います。' }, status: :unauthorized
@@ -62,11 +60,12 @@ module Api
           value: access_token,
           httponly: true,
           expires: 1.hour.from_now,
+          domain: Rails.env.production? ? '.drone-flight-log.com' : 'localhost',
           secure: Rails.env.production?,
-          same_site: Rails.env.production? ? :none : :lax
+          same_site: Rails.env.production? ? :lax : :lax
         }
       end
-
+      
       def refresh_token(user)
         refresh_token_secret = Rails.application.credentials.refresh_token_secret
         payload = { user_id: user.id }
@@ -75,8 +74,9 @@ module Api
           value: refresh_token,
           httponly: true,
           expires: 2.weeks.from_now,
+          domain: Rails.env.production? ? '.drone-flight-log.com' : 'localhost',
           secure: Rails.env.production?,
-          same_site: Rails.env.production? ? :none : :lax
+          same_site: Rails.env.production? ? :lax : :lax
         }
       end
     end
