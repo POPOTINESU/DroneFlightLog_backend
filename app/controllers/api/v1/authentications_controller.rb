@@ -23,11 +23,9 @@ module Api
       end
 
       def logout
-        # DELETE /api/v1/authentications/logout
-        # JWTトークンを削除する
-        # return: message
-        cookies.delete(:access_token)
-        cookies.delete(:refresh_token)
+        # クッキーを削除する際にドメイン属性を指定
+        cookies.delete(:access_token, domain: Rails.env.production? ? '.drone-flight-log.com' : 'localhost')
+        cookies.delete(:refresh_token, domain: Rails.env.production? ? '.drone-flight-log.com' : 'localhost')
         render json: { message: 'ログアウトしました。' }
       end
 
@@ -65,7 +63,7 @@ module Api
           same_site: Rails.env.production? ? :lax : :lax
         }
       end
-      
+
       def refresh_token(user)
         refresh_token_secret = Rails.application.credentials.refresh_token_secret
         payload = { user_id: user.id }
