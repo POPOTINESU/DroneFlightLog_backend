@@ -68,6 +68,57 @@ module Api
         end
       end
 
+      def invited_users
+        #　招待されていて、まだ参加していないユーザーを取得する
+        #
+        #Returns:
+        # invited_users: 招待されているユーザー
+
+        # ユーザーが紐づいているstatusがinvitedのグループを取得する
+
+        group_users = GroupUser.where(user: @current_user, status: :invited)
+        group_ids = group_users.pluck(:group_id)
+        groups = Group.where(id: group_ids)
+        invited_users = groups.map { |group|
+          {
+            id: group.id,
+            name: group.name,
+            user_count: group.users.count
+          }
+        }
+        render json: invited_users
+      end
+
+
+      def participate_or_reject
+        group = Group.find_by(id: params[:id])
+        return render json: { message: 'グループが見つかりませんでした。' }, status: :unprocessable_entity if group.nil?
+
+        if params[:is_accept]
+          # グループに参加する処理
+          group_user = GroupUser.find_or_initialize_by(user: @current_user, group: group)
+          group_user.status = :joined
+          group_user.role = :member
+
+          if group_user.save
+            render json: { message: 'グループに参加しました。' }, status: :created
+          else
+            Rails.logger.error "グループへの参加に失敗しました: #{group_user.errors.full_messages.join(', ')}"
+            render json: { message: 'グループに参加できませんでした。', errors: group_user.errors.full_messages }, status: :unprocessable_entity
+          end
+        else
+          # グループの招待を拒否する処理
+          group_user = GroupUser.find_by(user: @current_user, group: group)
+
+          if group_user&.destroy
+            render json: { message: 'グループの招待を拒否しました' }, status: :ok
+          else
+            Rails.logger.error "グループからの招待を拒否できませんでした: #{group_user&.errors&.full_messages&.join(', ')}"
+            render json: { message: 'グループからの招待を拒否できませんでした', errors: group_user&.errors&.full_messages }, status: :unprocessable_entity
+          end
+        end
+      end
+
       private
 
       def user_blank?
