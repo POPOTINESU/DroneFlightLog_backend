@@ -6,12 +6,17 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :users
       resources :password_resets, only: [:create, :edit, :update], param: :token
-      resources :groups, only: [:index, :create, :show]
+      resources :groups do
+        collection do
+          get :invited_users
+          post :participate_or_reject
+        end
+      end
       resources :drones, only: [:index, :create]
       resources :group_users do
         collection do
           post :invite
-          post :accept
+          post :participate_or_reject
         end
       end
       resources :flight_logs, only: [:index, :show, :create, :update, :destroy] do
