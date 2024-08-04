@@ -39,11 +39,6 @@ RUN chmod 0644 /etc/crontab && \
     chown root:root /var/run/crond && \
     chmod 0775 /var/run/crond
 
-# 非rootユーザーとして実行するための設定
-RUN useradd rails --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
-USER rails:rails
-
 # whenever gemのインストールとcrontabの更新
 RUN gem install whenever && \
     whenever --update-crontab
@@ -51,8 +46,14 @@ RUN gem install whenever && \
 # エントリーポイントスクリプトをコピー
 COPY entrypoint.sh /rails/entrypoint.sh
 
-# エントリーポイントスクリプトに実行権限を付与
+# エントリーポイントスクリプトに実行権限を付与（rootユーザーとして）
+USER root
 RUN chmod +x /rails/entrypoint.sh
+
+# 非rootユーザーとして実行するための設定
+RUN useradd rails --create-home --shell /bin/bash && \
+    chown -R rails:rails db log storage tmp
+USER rails:rails
 
 # エントリーポイントの設定
 ENTRYPOINT ["/rails/entrypoint.sh"]
