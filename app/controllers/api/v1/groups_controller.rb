@@ -40,7 +40,7 @@ module Api
                    end,
             drones: group.group_drones.map do |gd|
                       { id: gd.drone.id, drone_number: gd.drone.drone_number, JUNumber: gd.drone.JUNumber,
-                        purchaseDate: gd.drone.purchaseDate }
+                        purchaseDate: gd.drone.purchaseDate, inspection_date: gd.drone.inspectionDate }
                     end
           }
         end
@@ -115,7 +115,7 @@ module Api
           else
             Rails.logger.error "グループからの招待を拒否できませんでした: #{group_user&.errors&.full_messages&.join(', ')}"
             render json: { message: 'グループからの招待を拒否できませんでした', errors: group_user&.errors&.full_messages },
-                   status: :unprocessable_entity
+                  status: :unprocessable_entity
           end
         end
       end
@@ -148,22 +148,28 @@ module Api
           end
         end
       end
-
       def add_drones_to_group(group)
         return if params[:droneSets].blank?
 
         params[:droneSets].each do |drone_set|
-          drone = Drone.create!(
-            drone_number: drone_set[:droneNumber],
-            JUNumber: drone_set[:JUNumber],
-            purchaseDate: drone_set[:purchaseDate],
-            inspectionDate: drone_set[:inspectionDate]
-          ) do |d|
-            d.purchaseDate = Date.parse(drone_set[:purchaseDate])
-            d.inspectionDate = Date.parse(drone_set[:inspectionDate])
-          end
+          drone = Drone.find_by(drone_number: drone_set[:droneNumber])
 
-          GroupDrone.create!(group:, drone:) unless GroupDrone.exists?(group:, drone:)
+          # ドローンが存在しない場合は新規作成
+          if drone.nil?
+            drone = Drone.create!(
+              drone_number: drone_set[:droneNumber],
+              JUNumber: drone_set[:JUNumber],
+              purchase_date: Date.parse(drone_set[:purchaseDate]),
+              inspection_date: Date.parse(drone_set[:inspectionDate])
+            )
+          elsif drone.JUNumber == drone_set[:JUNumber]
+            unless GroupDrone.exists?(group: group, drone: drone)
+              GroupDrone.create!(group: group, drone: drone)
+            end
+          else
+            render json: { message: '機体の情報が一致しませんでした' }, status: :unprocessable_entity
+            return
+          end
         end
       end
     end

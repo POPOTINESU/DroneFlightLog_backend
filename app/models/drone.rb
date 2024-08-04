@@ -9,14 +9,15 @@ class Drone < ApplicationRecord
   # Validations
   validates :drone_number, presence: true
   validates :JUNumber, presence: true
-  validates :purchaseDate, presence: true
+  validates :purchase_date, presence: true
   validate :purchase_date_cannot_be_in_the_future
+  validates :inspection_date, presence: true
 
   private
 
   def purchase_date_cannot_be_in_the_future
-    return unless purchaseDate.present? && purchaseDate > Time.zone.today
+    return unless purchase_date.present? && purchase_date > Time.zone.today
 
-    errors.add(:purchaseDate, 'cannot be in the future')
+    errors.add(:purchase_date, 'cannot be in the future')
   end
 end

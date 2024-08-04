@@ -10,14 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_08_04_004118) do
+ActiveRecord::Schema[7.1].define(version: 2024_08_04_063008) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "drones", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "drone_number", null: false
     t.string "JUNumber", null: false
-    t.date "purchaseDate", null: false
+    t.date "purchase_date", null: false
     t.date "inspection_date"
     t.index ["JUNumber"], name: "index_drones_on_JUNumber", unique: true
     t.index ["drone_number"], name: "index_drones_on_drone_number", unique: true

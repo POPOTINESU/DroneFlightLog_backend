@@ -23,7 +23,7 @@ module Api
       end
 
       def self.alert_inspection
-        drones = Drone.where(inspectDate: ..1.week.from_now)
+        drones = Drone.where(inspection_date: ..1.week.from_now)
         drones.each do |drone|
           drone.groups.each do |group|
             group.users.each do |user|
@@ -45,18 +45,21 @@ module Api
         return if params[:droneSets].blank?
 
         params[:droneSets].each do |drone_set|
-          # ドローンが存在しない場合は新規作成
-          # ドローンが存在する場合は、グループに紐づいていない場合のみ新規作成
-          # ドローンが存在する場合で、グループに紐づいている場合はスキップ
+          drone = Drone.find_by(drone_number: drone_set[:droneNumber], JUNumber: drone_set[:JUNumber])
 
-          drone = Drone.find_by(drone_number: drone_set[:droneNumber])
-          if drone.nil?
-            drone = Drone.create!(drone_number: drone_set[:droneNumber], JUNumber: drone_set[:JUNumber],
-                                  purchaseDate: drone_set[:purchaseDate])
-          elsif drone&.groups&.exclude?(group)
-            GroupDrone.create!(group:, drone:)
+          unless drone
+            drone = Drone.create!(
+              drone_number: drone_set[:droneNumber],
+              JUNumber: drone_set[:JUNumber],
+              purchase_date: drone_set[:purchaseDate],
+              inspection_date: drone_set[:inspectionDate]
+            )
           end
-          GroupDrone.create!(group:, drone:) unless GroupDrone.exists?(group:, drone:)
+
+          # ドローンが存在する場合は、グループに紐づいていない場合のみグループに追加する
+          unless GroupDrone.exists?(group: group, drone: drone)
+            GroupDrone.create!(group: group, drone: drone)
+          end
         end
       end
     end

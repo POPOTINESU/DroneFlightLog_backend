@@ -1,14 +1,24 @@
+# ベースイメージ
 FROM ruby:3.3.0
-RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
+
+# 必要なパッケージをインストール
+RUN apt-get update -qq && apt-get install -y nodejs postgresql-client cron
+
+# 作業ディレクトリを設定
 WORKDIR /backend
+
+# GemfileとGemfile.lockをコピーし、bundle installを実行
 COPY ./Gemfile /backend/Gemfile
 COPY ./Gemfile.lock /backend/Gemfile.lock
 RUN bundle install
 
+# entrypoint.shをコピーし、実行権限を付与
 COPY ./entrypoint.sh /backend/entrypoint.sh
 RUN chmod +x /backend/entrypoint.sh
-ENTRYPOINT ["/backend/entrypoint.sh"]
+
+# ポートを公開
 EXPOSE 3000
 
-
-CMD ["rails", "server", "-b", "0.0.0.0"]
+# エントリーポイントスクリプトを実行し、cronサービスとPumaサーバーを起動
+ENTRYPOINT ["/backend/entrypoint.sh"]
+CMD ["sh", "-c", "service cron start && rails server -b 0.0.0.0"]
