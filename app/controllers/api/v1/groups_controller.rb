@@ -155,9 +155,11 @@ module Api
           drone = Drone.create!(
             drone_number: drone_set[:droneNumber],
             JUNumber: drone_set[:JUNumber],
-            purchaseDate: drone_set[:purchaseDate]
+            purchaseDate: drone_set[:purchaseDate],
+            inspectionDate: drone_set[:inspectionDate]
           ) do |d|
             d.purchaseDate = Date.parse(drone_set[:purchaseDate])
+            d.inspectionDate = Date.parse(drone_set[:inspectionDate])
           end
 
           unless GroupDrone.exists?(group: group, drone: drone)
