@@ -9,10 +9,12 @@ module Api
         if group.nil?
           render json: { message: 'グループが見つかりませんでした。' }, status: :unprocessable_entity
         else
-          flight_logs = FlightLog.joins(:flight_log_groups).where(flight_log_groups: { group_id: group.id }).includes(:drones, :users, :problem_fields)
+          flight_logs = FlightLog.joins(:flight_log_groups)
+                                 .where(flight_log_groups: { group_id: group.id })
+                                 .includes(:drones, :users, :problem_fields)
           flight_logs_with_details = flight_logs.map do |flight_log|
             {
-              flight_log: flight_log,
+              flight_log:,
               drones: flight_log.drones.select(:id, :JUNumber),
               users: flight_log.users.map { |user| { id: user.id, full_name: user.full_name } },
               problem_fields: flight_log.problem_fields.map { |pf| { id: pf.id, problem_description: pf.problem_description } }
@@ -30,12 +32,25 @@ module Api
           problem_field = flight_log.problem_fields.first
           render json: {
             id: flight_log.id,
-            flight_log: flight_log,
+            flight_log:,
             drones: flight_log.drones.select(:id, :JUNumber),
             users: flight_log.users.map { |user| { id: user.id, full_name: user.full_name } },
             groups: flight_log.groups.map { |group| { id: group.id, name: group.name } },
-            problem_field: problem_field ? { id: problem_field.id, problem_description: problem_field.problem_description, date_of_resolution_datetime: problem_field.date_of_resolution_datetime, corrective_action: problem_field.corrective_action } : nil
+            problem_field: if problem_field
+                             { id: problem_field.id, problem_description: problem_field.problem_description,
+                               date_of_resolution_datetime: problem_field.date_of_resolution_datetime,
+                               corrective_action: problem_field.corrective_action }
+                           end
           }, status: :ok
+        end
+      end
+
+      def edit
+        flight_log = FlightLog.find_by(id: params[:id])
+        if flight_log.nil?
+          render json: { message: 'フライトログが見つかりませんでした。' }, status: :unprocessable_entity
+        else
+          render json: { flight_log: }, status: :ok
         end
       end
 
@@ -86,15 +101,6 @@ module Api
           else
             render json: { error: flight_log.errors.full_messages }, status: :unprocessable_entity
           end
-        end
-      end
-
-      def edit
-        flight_log = FlightLog.find_by(id: params[:id])
-        if flight_log.nil?
-          render json: { message: 'フライトログが見つかりませんでした。' }, status: :unprocessable_entity
-        else
-          render json: { flight_log: flight_log }, status: :ok
         end
       end
 
@@ -192,8 +198,8 @@ module Api
       def flight_log_params
         params.require(:flight_log).permit(
           :flight_date, :pilot_name, :group_id, :JUNumber, :flight_summary,
-          :takeoff_location, :landing_location, :takeoff_time,:problem_description,
-          :date_of_resolution_datetime, :corrective_action,:landing_time, :total_time,
+          :takeoff_location, :landing_location, :takeoff_time, :problem_description,
+          :date_of_resolution_datetime, :corrective_action, :landing_time, :total_time,
           flight_purpose: [], specific_flight_types: []
         )
       end

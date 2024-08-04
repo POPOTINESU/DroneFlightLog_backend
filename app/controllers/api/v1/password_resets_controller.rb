@@ -3,6 +3,15 @@ require Rails.root.join('app/controllers/application_controller.rb').to_s
 module Api
   module V1
     class PasswordResetsController < ApplicationController
+      def edit
+        @user = User.find_by(reset_password_token: params[:token])
+        if @user&.password_token_valid?
+          render :edit
+        else
+          redirect_to new_password_reset_path, alert: 'パスワードリセットの有効期限が切れました。'
+        end
+      end
+
       def create
         user = User.find_by(email: params[:email])
         if user
@@ -14,18 +23,9 @@ module Api
         end
       end
 
-      def edit
-        @user = User.find_by(reset_password_token: params[:token])
-        if @user && @user.password_token_valid?
-          render :edit
-        else
-          redirect_to new_password_reset_path, alert: 'パスワードリセットの有効期限が切れました。'
-        end
-      end
-
       def update
         @user = User.find_by(reset_password_token: params[:token])
-        if @user && @user.password_token_valid? && @user.update(password_params)
+        if @user&.password_token_valid? && @user&.update(password_params)
           @user.clear_reset_password_token!
           redirect_to login_path, notice: 'パスワードをリセットしました。ログインしてください。'
         else

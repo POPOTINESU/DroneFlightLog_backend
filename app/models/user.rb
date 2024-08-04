@@ -12,7 +12,6 @@ class User < ApplicationRecord
   has_many :groups, through: :group_users, dependent: :destroy
 
   has_many :flight_log_users, dependent: :destroy
-  has_many :flight_logs, through: :groups, dependent: :destroy
 
   has_many :problem_fields, dependent: :destroy
   has_many :flight_logs, through: :problem_fields, dependent: :destroy
@@ -45,6 +44,6 @@ class User < ApplicationRecord
   end
 
   def password_token_valid?
-    (self.reset_password_sent_at + 2.hours) > Time.current
+    (reset_password_sent_at + 2.hours) > Time.current
   end
 end

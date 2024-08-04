@@ -60,7 +60,7 @@ module Api
           expires: 1.hour.from_now,
           domain: Rails.env.production? ? '.drone-flight-log.com' : 'localhost',
           secure: Rails.env.production?,
-          same_site: Rails.env.production? ? :lax : :lax
+          same_site: :lax
         }
       end
 
@@ -74,7 +74,7 @@ module Api
           expires: 2.weeks.from_now,
           domain: Rails.env.production? ? '.drone-flight-log.com' : 'localhost',
           secure: Rails.env.production?,
-          same_site: Rails.env.production? ? :lax : :lax
+          same_site: :lax
         }
       end
     end

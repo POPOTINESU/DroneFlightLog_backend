@@ -15,8 +15,8 @@ class Drone < ApplicationRecord
   private
 
   def purchase_date_cannot_be_in_the_future
-    if purchaseDate.present? && purchaseDate > Date.today
-      errors.add(:purchaseDate, "cannot be in the future")
-    end
+    return unless purchaseDate.present? && purchaseDate > Time.zone.today
+
+    errors.add(:purchaseDate, 'cannot be in the future')
   end
 end

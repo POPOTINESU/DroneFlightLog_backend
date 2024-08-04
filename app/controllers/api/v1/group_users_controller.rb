@@ -48,9 +48,9 @@ module Api
         # グループの管理者かどうかを確認する
         group = Group.find_by(id: params[:group_id])
         group_user = group.group_users.find_by(user_id: @current_user.id)
-        if group_user.role != 'admin'
-          render json: { message: '管理者権限がありません。' }, with: :unprocessable_entity
-        end
+        return false unless group_user.role != 'admin'
+
+        render json: { message: '管理者権限がありません。' }, with: :unprocessable_entity
       end
     end
   end

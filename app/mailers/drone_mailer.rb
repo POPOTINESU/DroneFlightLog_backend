@@ -5,3 +5,4 @@ class DroneMailer < ApplicationMailer
     @drone = drone
     mail(to: drone.group.users.pluck(:email), subject: 'Drone Inspection Alert')
   end
+end

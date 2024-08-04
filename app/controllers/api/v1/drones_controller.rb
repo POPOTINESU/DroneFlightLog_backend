@@ -12,7 +12,6 @@ module Api
         #
         # return: message
         ActiveRecord::Base.transaction do
-
           group = Group.find_by(id: params[:id])
           if group.nil?
             render json: { message: 'グループが見つかりませんでした。' }, status: :unprocessable_entity
@@ -23,20 +22,21 @@ module Api
         end
       end
 
-      def self.alertInspection
-        drones = Drone.where('inspectDate <= ?', 1.week.from_now)
+      def self.alert_inspection
+        drones = Drone.where(inspectDate: ..1.week.from_now)
         drones.each do |drone|
           drone.groups.each do |group|
             group.users.each do |user|
-              DroneMailer.with(user: user, drone: drone).inspection_date.deliver_now
+              DroneMailer.with(user:, drone:).inspection_date.deliver_now
             end
           end
         end
 
-        Rails.logger.info "ドローンの定期点検が近づいています。"
+        Rails.logger.info 'ドローンの定期点検が近づいています。'
       end
 
       private
+
       def group_params
         params.require(:group).permit(:name)
       end
@@ -51,13 +51,12 @@ module Api
 
           drone = Drone.find_by(drone_number: drone_set[:droneNumber])
           if drone.nil?
-            drone = Drone.create!(drone_number: drone_set[:droneNumber], JUNumber: drone_set[:JUNumber], purchaseDate: drone_set[:purchaseDate])
-          elsif drone && !drone.groups.include?(group)
-            GroupDrone.create!(group: group, drone: drone)
+            drone = Drone.create!(drone_number: drone_set[:droneNumber], JUNumber: drone_set[:JUNumber],
+                                  purchaseDate: drone_set[:purchaseDate])
+          elsif drone&.groups&.exclude?(group)
+            GroupDrone.create!(group:, drone:)
           end
-          unless GroupDrone.exists?(group: group, drone: drone)
-            GroupDrone.create!(group: group, drone: drone)
-          end
+          GroupDrone.create!(group:, drone:) unless GroupDrone.exists?(group:, drone:)
         end
       end
     end

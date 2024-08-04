@@ -3,7 +3,6 @@ class FlightLog < ApplicationRecord
   has_many :flight_log_drones
   has_many :drones, through: :flight_log_drones
   has_many :flight_log_users
-  has_many :users, through: :flight_log_users
   has_many :flight_log_groups
   has_many :groups, through: :flight_log_groups
   has_many :problem_fields

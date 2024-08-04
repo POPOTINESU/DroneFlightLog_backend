@@ -2,20 +2,21 @@ class ApplicationController < ActionController::API
   include ActionController::Cookies
 
   private
+
   def rescue_five_hundred(exception)
-    render json: { error: exception.message }, status: 500
+    render json: { error: exception.message }, status: :internal_server_error
   end
 
   def rescue_four_o_four(exception)
-    render json: { error: exception.message }, status: 404
+    render json: { error: exception.message }, status: :not_found
   end
 
   def rescue_four_hundred(exception)
-    render json: { error: exception.message }, status: 400
+    render json: { error: exception.message }, status: :bad_request
   end
 
   def rescue_four_twenty_two(exception)
-    render json: { error: exception.message }, status: 422
+    render json: { error: exception.message }, status: :unprocessable_content
   end
 
   def authenticate_user
