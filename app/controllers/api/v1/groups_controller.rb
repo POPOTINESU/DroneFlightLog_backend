@@ -115,7 +115,7 @@ module Api
           else
             Rails.logger.error "グループからの招待を拒否できませんでした: #{group_user&.errors&.full_messages&.join(', ')}"
             render json: { message: 'グループからの招待を拒否できませんでした', errors: group_user&.errors&.full_messages },
-                  status: :unprocessable_entity
+                   status: :unprocessable_entity
           end
         end
       end
@@ -148,28 +148,22 @@ module Api
           end
         end
       end
+
       def add_drones_to_group(group)
         return if params[:droneSets].blank?
 
         params[:droneSets].each do |drone_set|
-          drone = Drone.find_by(drone_number: drone_set[:droneNumber])
+          drone = Drone.find_by(drone_number: drone_set[:droneNumber], JUNumber: drone_set[:JUNumber]) || Drone.create!(
+            drone_number: drone_set[:droneNumber],
+            JUNumber: drone_set[:JUNumber],
+            purchase_date: drone_set[:purchaseDate],
+            inspection_date: drone_set[:inspectionDate]
+          )
 
-          # ドローンが存在しない場合は新規作成
-          if drone.nil?
-            drone = Drone.create!(
-              drone_number: drone_set[:droneNumber],
-              JUNumber: drone_set[:JUNumber],
-              purchase_date: Date.parse(drone_set[:purchaseDate]),
-              inspection_date: Date.parse(drone_set[:inspectionDate])
-            )
-          elsif drone.JUNumber == drone_set[:JUNumber]
-            unless GroupDrone.exists?(group: group, drone: drone)
-              GroupDrone.create!(group: group, drone: drone)
-            end
-          else
-            render json: { message: '機体の情報が一致しませんでした' }, status: :unprocessable_entity
-            return
-          end
+          # ドローンが存在する場合は、グループに紐づいていない場合のみグループに追加する
+          next if GroupDrone.exists?(group:, drone:)
+
+          GroupDrone.create!(group:, drone:)
         end
       end
     end

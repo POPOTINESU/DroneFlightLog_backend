@@ -45,21 +45,17 @@ module Api
         return if params[:droneSets].blank?
 
         params[:droneSets].each do |drone_set|
-          drone = Drone.find_by(drone_number: drone_set[:droneNumber], JUNumber: drone_set[:JUNumber])
-
-          unless drone
-            drone = Drone.create!(
-              drone_number: drone_set[:droneNumber],
-              JUNumber: drone_set[:JUNumber],
-              purchase_date: drone_set[:purchaseDate],
-              inspection_date: drone_set[:inspectionDate]
-            )
-          end
+          drone = Drone.find_by(drone_number: drone_set[:droneNumber], JUNumber: drone_set[:JUNumber]) || Drone.create!(
+            drone_number: drone_set[:droneNumber],
+            JUNumber: drone_set[:JUNumber],
+            purchase_date: drone_set[:purchaseDate],
+            inspection_date: drone_set[:inspectionDate]
+          )
 
           # ドローンが存在する場合は、グループに紐づいていない場合のみグループに追加する
-          unless GroupDrone.exists?(group: group, drone: drone)
-            GroupDrone.create!(group: group, drone: drone)
-          end
+          next if GroupDrone.exists?(group:, drone:)
+
+          GroupDrone.create!(group:, drone:)
         end
       end
     end
