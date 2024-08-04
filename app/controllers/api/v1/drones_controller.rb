@@ -22,6 +22,20 @@ module Api
           end
         end
       end
+
+      def self.alertInspection
+        drones = Drone.where('inspectDate <= ?', 1.week.from_now)
+        drones.each do |drone|
+          drone.groups.each do |group|
+            group.users.each do |user|
+              DroneMailer.with(user: user, drone: drone).inspection_date.deliver_now
+            end
+          end
+        end
+
+        Rails.logger.info "ドローンの定期点検が近づいています。"
+      end
+
       private
       def group_params
         params.require(:group).permit(:name)

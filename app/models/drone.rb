@@ -7,8 +7,8 @@ class Drone < ApplicationRecord
   has_many :flight_logs, through: :flight_log_drones, dependent: :destroy
 
   # Validations
-  validates :drone_number, presence: true, uniqueness: true
-  validates :JUNumber, presence: true, uniqueness: true
+  validates :drone_number, presence: true
+  validates :JUNumber, presence: true
   validates :purchaseDate, presence: true
   validate :purchase_date_cannot_be_in_the_future
 
