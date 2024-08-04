@@ -1,10 +1,13 @@
-# ベースイメージ
-FROM registry.docker.com/library/ruby:3.3.0-slim as base
+# syntax = docker/dockerfile:1
 
-# 作業ディレクトリ
+# Base image for the build
+ARG RUBY_VERSION=3.3.0
+FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim as base
+
+# Set working directory
 WORKDIR /rails
 
-# 環境変数設定
+# Set production environment
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
@@ -13,50 +16,40 @@ ENV RAILS_ENV="production" \
     LANG=C.UTF-8 \
     PATH="/usr/local/bundle/bin:${PATH}"
 
-# ビルドステージ
-FROM base as build
-
-# パッケージのインストール
+# Install dependencies for building gems
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config cron
 
-# Gemのインストール
+# Install application gems
 COPY Gemfile Gemfile.lock ./
 RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    bundle exec bootsnap precompile --gemfile
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git
 
-# アプリケーションコードのコピー
+# Copy application code
 COPY . .
 
-# bootsnapコードのプリコンパイル
+# Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# wheneverをインストール
-RUN gem install whenever
+# Ensure cron can run
+RUN chmod 0644 /etc/crontab && \
+    touch /var/log/cron.log && \
+    chmod 0644 /var/log/cron.log && \
+    mkdir -p /var/run/crond && \
+    chown root:root /var/run/crond && \
+    chmod 0775 /var/run/crond
 
-# wheneverコマンドを実行してcrontabを更新
-RUN whenever --update-crontab
-
-# 最終ステージ
-FROM base
-
-# デプロイに必要なパッケージのインストール
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libvips postgresql-client cron && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-# ビルドアーティファクトのコピー
-COPY --from=build /usr/local/bundle /usr/local/bundle
-COPY --from=build /rails /rails
-
-# ユーザー設定
+# Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
 USER rails:rails
 
-# entrypointの設定
+# Add whenever gem and update crontab
+RUN gem install whenever && \
+    whenever --update-crontab
+
+# Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# cronサービスを起動し、アプリケーションを開始
-CMD ["sh", "-c", "cron && bundle exec puma -C config/puma.rb"]
+# Start the cron service and Rails server
+CMD ["sh", "-c", "cron && bundle exec rails server -b 0.0.0.0 -p 3000"]
