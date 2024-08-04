@@ -1,13 +1,13 @@
 # syntax = docker/dockerfile:1
 
-# Base image for the build
+# ベースイメージの設定
 ARG RUBY_VERSION=3.3.0
 FROM registry.docker.com/library/ruby:$RUBY_VERSION-slim as base
 
-# Set working directory
+# 作業ディレクトリの設定
 WORKDIR /rails
 
-# Set production environment
+# 環境変数の設定
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
@@ -16,22 +16,22 @@ ENV RAILS_ENV="production" \
     LANG=C.UTF-8 \
     PATH="/usr/local/bundle/bin:${PATH}"
 
-# Install dependencies for building gems
+# 必要なパッケージのインストール
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config cron
 
-# Install application gems
+# アプリケーションのGemをインストール
 COPY Gemfile Gemfile.lock ./
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git
 
-# Copy application code
+# アプリケーションコードのコピー
 COPY . .
 
-# Precompile bootsnap code for faster boot times
+# bootsnapの事前コンパイル
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Ensure cron can run
+# cronが実行できるようにする設定
 RUN chmod 0644 /etc/crontab && \
     touch /var/log/cron.log && \
     chmod 0644 /var/log/cron.log && \
@@ -39,17 +39,23 @@ RUN chmod 0644 /etc/crontab && \
     chown root:root /var/run/crond && \
     chmod 0775 /var/run/crond
 
-# Run and own only the runtime files as a non-root user for security
+# 非rootユーザーとして実行するための設定
 RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
 USER rails:rails
 
-# Add whenever gem and update crontab
+# whenever gemのインストールとcrontabの更新
 RUN gem install whenever && \
     whenever --update-crontab
 
-# Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+# エントリーポイントスクリプトをコピー
+COPY entrypoint.sh /rails/entrypoint.sh
 
-# Start the cron service and Rails server
-CMD ["sh", "-c", "cron && bundle exec rails server -b 0.0.0.0 -p 3000"]
+# エントリーポイントスクリプトに実行権限を付与
+RUN chmod +x /rails/entrypoint.sh
+
+# エントリーポイントの設定
+ENTRYPOINT ["/rails/entrypoint.sh"]
+
+# サーバーを起動
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
